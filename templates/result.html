@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>採点結果</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 12px;
+            background: #f5f5f5;
+        }
+
+        .result-box {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .link-btn {
+            display: inline-block;
+            padding: 14px 20px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 10px;
+        }
+        .ledger-row-box {
+            margin-bottom: 14px;
+        }
+
+        .ledger-card-wrap {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .ledger-card {
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 140px;
+            flex: 1 1 180px;
+            box-sizing: border-box;
+        }
+
+        .ledger-card.answer {
+            background: #f5f5f5;
+        }
+
+        .ledger-card.correct {
+            background: #e8f5e9;
+        }
+
+        .ledger-card-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .ledger-t {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            text-align: center;
+        }
+
+        .ledger-t-head {
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+        }
+
+        .ledger-t-head div:first-child,
+        .ledger-t-body div:first-child {
+            border-right: 1px solid #999;
+        }
+
+        .ledger-t-body {
+            min-height: 34px;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            .link-btn {
+                display: inline-block;
+                padding: 14px 20px;
+                text-decoration: none;
+                border-radius: 10px;
+                font-size: 18px;
+                font-weight: bold;
+                margin-right: 8px;
+                margin-bottom: 10px;
+            }
+            .ledger-card-wrap {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .ledger-card {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+<h1 style="margin-bottom:10px;">結果</h1>
+
+<p style="font-size:20px; margin-bottom:8px;">
+    {{ score }} / {{ total }} 点
+</p>
+
+<p style="font-size:18px; color:blue; margin-bottom:20px;">
+    最高点：{{ best_score }} / {{ total }}
+</p>
+
+<h2 style="margin-top:10px; margin-bottom:10px;">スコア履歴</h2>
+<ul>
+{% for s in history %}
+    <li>{{ s.time }} → {{ s.score }} / {{ total }}</li>
+{% endfor %}
+ </ul>
+
+<h2 style="margin-top:20px; margin-bottom:12px;">復習</h2>
+
+{% if mode not in ["account_only", "direction_only", "journal_input", "ledger"] and wrong_indices %}
+    <div style="margin-top:20px; margin-bottom:20px;">
+        <a href="/?mode={{ mode }}&retry_wrong=1"
+        class="link-btn"
+        style="background:#ff9800; color:white;">
+            間違えた問題だけもう一度
+        </a>
+    </div>
+{% endif %}
+
+{% if mode == "journal_input" %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>問題：</strong>{{ r.question }}</p>
+            <p><strong>得点：</strong>{{ r.question_score }} / {{ r.question_max }}</p>
+
+            <p><strong>あなたの解答</strong></p>
+
+            <div style="margin-left:10px;">
+                <div>
+                    （借方）{{ r.user_answer.debit1 }} {{ r.user_answer.debit1_amount }}
+                    　　（貸方）{{ r.user_answer.credit1 }} {{ r.user_answer.credit1_amount }}
+                </div>
+
+                {% if r.user_answer.debit2 %}
+                <div>
+                    （借方）{{ r.user_answer.debit2 }} {{ r.user_answer.debit2_amount }}
+                </div>
+                {% endif %}
+
+                {% if r.user_answer.credit2 %}
+                <div>
+                    　　　　　　（貸方）{{ r.user_answer.credit2 }} {{ r.user_answer.credit2_amount }}
+                </div>
+                {% endif %}
+            </div>
+
+            <p><strong>正解</strong></p>
+
+            <div style="margin-left:10px;">
+                <div>
+                    （借方）{{ r.correct_answer.debit1 }} {{ r.correct_answer.debit1_amount }}
+                    　　（貸方）{{ r.correct_answer.credit1 }} {{ r.correct_answer.credit1_amount }}
+                </div>
+
+                {% if r.correct_answer.credit2 %}
+                <div>
+                    　　　　　　（貸方）{{ r.correct_answer.credit2 }} {{ r.correct_answer.credit2_amount }}
+                </div>
+                {% endif %}
+            </div>
+
+            <p style="margin-top:12px;"><strong>解答の確認</strong></p>
+
+            <div style="margin-left:10px;">
+                {% for row in r.row_details %}
+                    <div style="
+                        margin-bottom:8px;
+                        padding:8px;
+                        border-radius:8px;
+                        background:
+                            {% if row['subject_ok'] and row['amount_ok'] %}
+                                #e8f5e9
+                            {% elif row['subject_ok'] or row['amount_ok'] %}
+                                #fff8e1
+                            {% else %}
+                                #ffebee
+                            {% endif %};
+                    ">
+                        <strong>{{ row["row_name"] }}</strong>：
+                        {% if row["subject_ok"] and row["amount_ok"] %}
+                            科目と金額は正しいです
+                        {% elif row["subject_ok"] and not row["amount_ok"] %}
+                            科目は正しいですが、金額が違います
+                        {% elif not row["subject_ok"] and row["amount_ok"] %}
+                            金額は正しいですが、科目が違います
+                        {% else %}
+                            科目と金額の両方が違います
+                        {% endif %}
+                        （{{ row["row_score"] }}点）
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if r.explanation %}
+            <p style="margin-top:10px;">
+                <strong>解説：</strong>{{ r.explanation }}
+            </p>
+            {% endif %}
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "ledger" %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>問題：</strong>{{ r.question }}</p>
+            <p><strong>得点：</strong>{{ r.question_score }} / {{ r.question_max }}</p>
+
+            <p><strong>解答の確認</strong></p>
+
+            <div style="margin-left:10px;">
+                {% for row in r.row_results %}
+                    <div style="
+                        margin-bottom:8px;
+                        padding:8px;
+                        border-radius:8px;
+                        background:
+                            {% if row.account_ok and row.side_ok %}
+                                #e8f5e9
+                            {% elif row.account_ok or row.side_ok %}
+                                #fff8e1
+                            {% else %}
+                                #ffebee
+                            {% endif %};
+                    ">
+                        <div class="ledger-row-box">
+                            <div>
+                                <strong>{{ row.account }}</strong>（{{ row.amount }}）：
+                                {{ row.feedback }}
+                                （{{ row.row_score }}点）
+                            </div>
+
+                            <div class="ledger-card-wrap">
+                                <div class="ledger-card answer">
+                                    <div class="ledger-card-title">あなたの解答</div>
+
+                                    <div>{{ row.user_account or "未選択" }}勘定</div>
+
+                                    <div class="ledger-t ledger-t-head">
+                                        <div>借方</div>
+                                        <div>貸方</div>
+                                    </div>
+
+                                    <div class="ledger-t ledger-t-body">
+                                        <div>{% if row.user_side == "借方" %}{{ row.amount }}{% else %}&nbsp;{% endif %}</div>
+                                        <div>{% if row.user_side == "貸方" %}{{ row.amount }}{% else %}&nbsp;{% endif %}</div>
+                                    </div>
+                                </div>
+
+                                <div class="ledger-card correct">
+                                    <div class="ledger-card-title">正解</div>
+
+                                    <div>{{ row.correct_account }}勘定</div>
+
+                                    <div class="ledger-t ledger-t-head">
+                                        <div>借方</div>
+                                        <div>貸方</div>
+                                    </div>
+
+                                    <div class="ledger-t ledger-t-body">
+                                        <div>{% if row.correct_side == "借方" %}{{ row.amount }}{% else %}&nbsp;{% endif %}</div>
+                                        <div>{% if row.correct_side == "貸方" %}{{ row.amount }}{% else %}&nbsp;{% endif %}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if r.explanation %}
+            <p style="margin-top:10px;">
+                <strong>解説：</strong>{{ r.explanation }}
+            </p>
+            {% endif %}
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "direction_only" %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>問題：</strong>{{ r.question }}</p>
+            <p><strong>得点：</strong>{{ r.question_score }} / {{ r.question_max }}</p>
+
+            <p><strong>解答の確認</strong></p>
+
+            <div style="margin-left:10px;">
+                {% for row in r.row_results %}
+                    <div style="
+                        margin-bottom:8px;
+                        padding:8px;
+                        border-radius:8px;
+                        background:{% if row.side_ok %}#e8f5e9{% else %}#ffebee{% endif %};
+                    ">
+                        <strong>{{ row.account }}</strong>：
+                        あなたの解答 = {{ row.user_side or "未選択" }} /
+                        正解 = {{ row.correct_side }}
+                        <br>
+                        {{ row.feedback }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if r.explanation %}
+            <p style="margin-top:10px;">
+                <strong>解説：</strong>{{ r.explanation }}
+            </p>
+            {% endif %}
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "trial_balance_direction" %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>勘定科目：</strong>{{ r.account }}</p>
+
+            <p>
+                <strong>あなたの解答：</strong>
+                <span style="color:{% if r.is_correct %}green{% else %}red{% endif %};">
+                    {{ r.user_side or "未選択" }}
+                </span>
+            </p>
+
+            <p>
+                <strong>正解：</strong>
+                <span style="color:green;">{{ r.correct_side }}</span>
+            </p>
+
+            <p><strong>解答の確認：</strong>{{ r.feedback }}</p>
+
+            {% if r.explanation %}
+            <p><strong>解説：</strong>{{ r.explanation }}</p>
+            {% endif %}
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "trial_balance_amount" %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>勘定科目：</strong>{{ r.account }}</p>
+            <p><strong>方向：</strong>{{ r.side }}</p>
+
+            <p>
+                <strong>あなたの解答：</strong>
+                <span style="color:{% if r.is_correct %}green{% else %}red{% endif %};">
+                    {{ r.user_amount or "未入力" }}
+                </span>
+            </p>
+
+            <p>
+                <strong>正解：</strong>
+                <span style="color:green;">{{ r.correct_amount }}</span>
+            </p>
+
+            <p><strong>解答の確認：</strong>{{ r.feedback }}</p>
+
+            {% if r.explanation %}
+            <p><strong>解説：</strong>{{ r.explanation }}</p>
+            {% endif %}
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "worksheet_sort" %}
+
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>問題：</strong>{{ r.question }}</p>
+            <p><strong>あなたの答え：</strong>{{ r.user_answer }}</p>
+            <p><strong>正解：</strong>{{ r.correct_answer }}</p>
+            <p><strong>解説：</strong>{{ r.explanation }}</p>
+            <p><strong>結果：</strong>
+                {% if r.is_correct %}✔ 正解{% else %}✖ 不正解{% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% elif mode == "worksheet_amount" %}
+
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>勘定科目：</strong>{{ r.account }}</p>
+            <p><strong>区分：</strong>{{ r.side }}</p>
+            <p><strong>あなたの答え：</strong>{{ r.user_amount }}</p>
+            <p><strong>正解：</strong>{{ r.correct_amount }}</p>
+            <p><strong>解説：</strong>{{ r.explanation }}</p>
+            <p><strong>結果：</strong>
+                {% if r.is_correct %}✔ 正解{% else %}✖ 不正解{% endif %}
+            </p>
+        </div>
+    {% endfor %}
+
+{% else %}
+    {% for r in results %}
+        <div class="result-box" style="
+            border:2px solid {% if r.is_correct %}green{% else %}red{% endif %};
+            background-color:{% if r.is_correct %}#ecffec{% else %}#ffecec{% endif %};
+        ">
+            <p><strong>問題：</strong>{{ r.question }}</p>
+
+            <p>
+                <strong>あなたの答え：</strong>
+                <span style="color:{% if r.is_correct %}green{% else %}red{% endif %};">
+                    {{ r.user_answer }}
+                </span>
+            </p>
+
+            <p>
+                <strong>正解：</strong>
+                <span style="color:green;">{{ r.correct_answer }}</span>
+            </p>
+
+            <p><strong>解説：</strong>{{ r.explanation }}</p>
+
+            <p>
+                <strong>結果：</strong>
+                {% if r.is_correct %}
+                    <span style="color:green; font-weight:bold; font-size:18px;">✔ 正解</span>
+                {% else %}
+                    <span style="color:red; font-weight:bold; font-size:18px;">✖ 不正解</span>
+                {% endif %}
+            </p>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<br>
+<a href="/?mode={{ mode }}" class="link-btn" style="background:#2196F3; color:white;">もう一度</a>
+<br><br>
+
+<a href="/?mode={{ mode }}&reset=1"
+   class="link-btn"
+   style="background:red; color:white;">
+   履歴リセット
+</a>
+<div style="text-align:center; margin-top:20px;">
+    <a href="/" style="
+        display:inline-block;
+        padding:10px 20px;
+        background:#1976d2;
+        color:white;
+        border-radius:8px;
+        text-decoration:none;
+        font-weight:bold;
+    ">
+        ホームへ戻る
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簿記復習サイト_GTS</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 12px;
+            background: #f5f5f5;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 26px;
+            margin-top: 10px;
+        }
+
+        .menu {
+            text-align: center;
+            line-height: 2px;
+            margin-bottom: 20px;
+        }
+
+        .question-box {
+            margin: 15px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            background: #f9f9f9;
+            max-width: 900px;
+        }
+
+        .journal-wrap {
+            margin-top: 10px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .journal-col {
+            flex: 1;
+            min-width: 280px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .journal-row {
+            margin-bottom: 12px;
+        }
+
+        select,
+        input[type="number"] {
+            font-size: 16px;
+            padding: 10px;
+            margin-top: 6px;
+            margin-right: 6px;
+            border: 1px solid #bbb;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 120px;
+        }
+
+        .submit-area {
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            background: #f5f5f5;
+            padding: 12px 0;
+        }
+
+        .submit-btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .choice-label {
+            display: block;
+            padding: 12px;
+            margin: 6px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .journal-col {
+                min-width: 100%;
+            }
+
+            select,
+            input[type="number"] {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            .submit-btn {
+                width: 100%;
+                font-size: 22px;
+                padding: 16px;
+            }
+
+            .choice-label {
+                font-size: 18px;
+                padding: 14px;
+            }
+        }
+        .menu-group {
+            margin: 18px auto;
+            max-width: 900px;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .menu-group h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            text-align: center;
+            margin: 24px auto;          
+            margin-top: 20px;  
+        }
+
+        .menu {
+            text-align: center;
+            line-height: 2;
+            margin: 0;
+
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .menu a {
+            margin: 0 6px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+<h1 class="page-title">簿記復習GTSクラス</h1>
+
+<p style="text-align:center; font-size:14px; color:#555; margin-top:10px;">
+このアプリは、授業内容の理解を深めるための補助ツールです。
+</p>
+<p style="text-align:center;">
+    {{ title }}
+</p>
+
+{% if message %}
+<p style="text-align:center; color:#d32f2f; font-weight:bold; margin-bottom:16px;">
+    {{ message }}
+</p>
+{% endif %}
+
+<div class="menu-group">
+    <h3>基礎知識</h3>
+    <p class="menu">
+        <a href="/?mode=classification">分類問題</a> |
+        <a href="/?mode=reverse">勘定科目問題</a> |
+        <a href="/?mode=reason">理由問題</a>
+    </p>
+</div>
+
+<div class="menu-group">
+    <h3>期中手続</h3>
+    <p class="menu">
+        <a href="/?mode=account_only">勘定だけ</a> |
+        <a href="/?mode=direction_only">方向だけ</a> |
+        <a href="/?mode=journal_easy">仕訳基礎</a> |
+     <!--      <a href="/?mode=journal_hard">仕訳（応用）</a> | -->
+        <a href="/?mode=journal_input">仕訳入力</a> |
+        <a href="/?mode=ledger">元帳転記</a> |
+        <a href="/?mode=trial_balance_direction">試算表（残高の方向）</a> 
+
+    </p>
+</div>
+
+<div class="menu-group">
+    <h3>決算</h3>
+    <p class="menu">
+     <!--   <a href="/?mode=trial_balance_amount">試算表（残高）</a> | -->
+        <a href="/?mode=stock_flow">ストック・フロー</a> |
+        <a href="/?mode=bs_pl">BS / PL</a> |
+        <a href="/?mode=bs_pl_reason">理由</a>
+    </p>
+</div>
+
+<div class="menu-group">
+    <h3>基礎知識復習</h3>
+    <p class="menu">
+        <a href="/?mode=review&source=classification">分類問題の復習</a> |
+        <a href="/?mode=review&source=reverse">勘定科目問題の復習</a> |
+        <a href="/?mode=review&source=reason">理由問題の復習</a> 
+    </p>
+</div>
+
+<!--   <p class="menu">s
+<a href="/?mode=classification">分類問題</a> |
+    <a href="/?mode=reason">理由問題</a> |
+    <a href="/?mode=reverse">勘定科目問題</a> |
+    <a href="/?mode=account_only">勘定だけ</a> |
+    <a href="/?mode=direction_only">方向だけ</a> |
+    <a href="/?mode=journal">仕訳（全体）</a> |
+    <a href="/?mode=journal_easy">仕訳（基礎）</a> |
+    <a href="/?mode=journal_hard">仕訳（応用）</a> |
+    <a href="/?mode=journal_input">仕訳（入力）</a> |
+    <a href="/?mode=ledger">元帳転記</a> |
+    <a href="/?mode=trial_balance_direction">試算表（残高の方向）</a> |
+    <a href="/?mode=trial_balance_amount">試算表（残高）</a> |
+    <a href="/?mode=stock_flow">ストック・フロー</a> |
+    <a href="/?mode=bs_pl">BS / PL</a> |  
+    <a href="/?mode=bs_pl_reason">理由（BS/PL）</a> |
+    <a href="/?mode=inventory_gap">売上原価（考え方）</a> |
+    <a href="/?mode=inventory_journal_link">売上原価（仕訳）</a> |
+    <a href="/?mode=closing_transfer">損益振替</a> |
+    <a href="/?mode=bs_pl_reverse">逆問題（BS/PL）</a> |
+    <h3>精算表</h3>
+    <a href="/?mode=worksheet_intro">精算表とは？</a> |
+    <a href="/?mode=worksheet_amount">精算表（金額）</a> |
+    <a href="/?mode=worksheet_flow">精算表（流れ）</a> |
+    <a href="/?mode=worksheet_to_fs">精算表 → BS/PL</a> |
+    <a href="/?mode=mini_closing">ミニ決算（通し）</a>
+
+   <a href="/?mode=worksheet_intro">精算表（意味）</a> |
+    <a href="/?mode=worksheet_sort">精算表（方向）</a> | 
+    <a href="/?mode=worksheet_amount">精算表（金額）</a> |
+    <a href="/?mode=adjustment_reason" class="link-btn">決算整理（理由）
+    <a href="/?mode=adjustment_journal" class="link-btn">決算整理（仕訳）
+    <a href="/?mode=worksheet_flow" class="link-btn">精算表（流れ）</a>
+    <a href="/?mode=worksheet_to_fs" class="link-btn">精算表 → BS/PL</a>
+    <a href="/?mode=mini_closing" class="link-btn">ミニ決算（通し）</a> -->
+
+
+
+{% if message %}
+<p style="text-align:center; color:red; font-weight:bold;">
+    {{ message }}
+</p>
+{% endif %}
+
+{% if questions %}
+
+<form method="POST">
+    <div id="question-start">
+
+    <input type="hidden" name="mode" value="{{ mode }}">
+
+    <p style="text-align:left; font-weight:bold; margin:10px 0 16px 0;">
+        {{ title }}
+    </p>
+    
+
+    {% if mode == "review" %}
+    <input type="hidden" name="source_mode" value="{{ review_source_mode }}">
+    {% endif %}
+
+{% for q in questions %}
+    {% set q_index = loop.index0 %}
+    <div class="question-box">
+        {% if q.question is defined %}
+        <p style="margin-bottom:12px; font-size:18px; white-space: pre-line;">
+            {{ q.question }}
+            </p>
+        {% endif %}
+
+
+    {% if mode == "ledger" %}
+                <div style="
+                    margin-bottom:15px;
+                    padding:12px;
+                    background:#f0f4f8;
+                    border-radius:8px;
+                    border-left:6px solid #90caf9;
+                ">
+                    <div style="font-weight:bold; margin-bottom:8px;">仕訳</div>
+
+                    {% for entry in q.entries %}
+                        <div style="
+                            margin-bottom:6px;
+                            padding:6px 8px;
+                            background:white;
+                            border-radius:6px;
+                        ">
+                            {% if entry.side == "借方" %}
+                                借方：{{ entry.account }}　{{ entry.amount }}
+                            {% else %}
+                                貸方：{{ entry.account }}　{{ entry.amount }}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                    <p style="margin-top:0;">
+                        <strong>この仕訳の各行について、どの勘定のどちら側に転記されるか選んでください。</strong>
+                    </p>
+                    <p style="color:#555; margin-top:6px; margin-bottom:14px;">
+                        仕訳を1行ずつ見て、「どの勘定に」「借方・貸方のどちらへ」書くかを考えましょう。
+                    </p>
+
+                    {% for entry in q.entries %}
+                        <div style="margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <p style="margin-top:0; margin-bottom:8px;">
+                                {% if entry.side == "借方" %}
+                                    借方：{{ entry.account }}　{{ entry.amount }}
+                                {% else %}
+                                    貸方：{{ entry.account }}　{{ entry.amount }}
+                                {% endif %}
+                            </p>
+
+                            <p style="margin-top:0; margin-bottom:8px; font-weight:bold;">
+                                この行を転記 →
+                            </p>
+
+                            <p style="font-size:13px; color:#666; margin-top:0; margin-bottom:14px;">
+                                この行はどの勘定のどちら側に書くか選びましょう。
+                            </p>
+
+                            <div style="font-weight:bold; font-size:22px; margin-bottom:8px;">
+                                {{ entry.account }}
+                            </div>
+
+                            <div style="font-weight:bold; font-size:18px; margin-bottom:12px;">
+                                金額：{{ entry.amount }}
+                            </div>
+
+                            <div>勘定名</div>
+                            <select name="ledger_account_{{ q_index }}_{{ loop.index0 }}">
+                                {% for item in q.entries %}
+                                    <option value="{{ item.account }}">{{ item.account }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div style="margin-top:8px; font-weight:bold;">左右</div>
+
+                            <label>
+                                <input type="radio" name="ledger_side_{{ q_index }}_{{ loop.index0 }}" value="借方"> 借方
+                            </label>
+                            <label>
+                                <input type="radio" name="ledger_side_{{ q_index }}_{{ loop.index0 }}" value="貸方"> 貸方
+                            </label>
+
+                            <input type="hidden" name="ledger_account_answer_{{ q_index }}_{{ loop.index0 }}" value="{{ entry.account }}">
+                            <input type="hidden" name="ledger_side_answer_{{ q_index }}_{{ loop.index0 }}" value="{{ entry.side }}">
+                            <input type="hidden" name="ledger_amount_{{ q_index }}_{{ loop.index0 }}" value="{{ entry.amount }}">
+                        </div>
+                    {% endfor %}
+
+                    <input type="hidden" name="ledger_entry_count_{{ q_index }}" value="{{ q.entries|length }}">
+                    <input type="hidden" name="ledger_question_{{ q_index }}" value="{{ q.question }}">
+                    <input type="hidden" name="ledger_explanation_{{ q_index }}" value="{{ q.explanation }}">
+                </div>
+
+            {% elif mode == "journal_input" %}
+                    <div style="margin-bottom:12px; padding:10px; background:#eef7ff; border-left:5px solid #64b5f6; border-radius:8px; font-size:14px; color:#333;">
+        まず使う勘定科目を選び、次に金額を入力しましょう。<br>
+            </div>
+
+            
+                <div class="journal-wrap">
+                    <div class="journal-col">
+                        <h3>借方</h3>
+
+                        <div class="journal-row">
+                            <div>科目</div>
+                            <select name="debit1_{{ q_index }}">
+                                <option value="">選択してください</option>
+                                {% for item in q.debit1_choices %}
+                                    <option value="{{ item }}">{{ item }}</option>
+                                {% endfor %}
+                            </select>
+                            <div>金額</div>
+                            <input type="number" name="debit1_amount_{{ q_index }}" placeholder="例：10000">           
+                                 </div>
+
+                        {% if q.debit2_choices %}
+                        <div class="journal-row">
+                            <div style="font-weight:bold; color:#666;">2行目（必要なときだけ）</div>
+
+                            <div>科目</div>
+                            <select name="debit2_{{ q_index }}">
+                                <option value="">選択してください</option>
+                                {% for item in q.debit2_choices %}
+                                    <option value="{{ item }}">{{ item }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div>金額</div>
+                            <input type="number" name="debit2_amount_{{ q_index }}" placeholder="例：10000">
+                        </div>
+                        {% endif %}                   
+                     </div>
+
+                    <div class="journal-col">
+                        <h3>貸方</h3>
+
+                        <div class="journal-row">
+                            <div>科目</div>
+                            <select name="credit1_{{ q_index }}">
+                                <option value="">選択してください</option>
+                                {% for item in q.credit1_choices %}
+                                    <option value="{{ item }}">{{ item }}</option>
+                                {% endfor %}
+                            </select>
+                            <div>金額</div>
+                            <input type="number" name="credit1_amount_{{ q_index }}" placeholder="例：10000">
+                        </div>
+
+                        {% if q.credit2_choices %}
+                        <div class="journal-row">
+                            <div style="font-weight:bold; color:#666;">2行目（必要なときだけ）</div>
+
+                            <div>科目</div>
+                            <select name="credit2_{{ q_index }}">
+                                <option value="">選択してください</option>
+                                {% for item in q.credit2_choices %}
+                                    <option value="{{ item }}">{{ item }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div>金額</div>
+                            <input type="number" name="credit2_amount_{{ q_index }}" placeholder="例：10000">
+                        </div>
+                        {% endif %}           
+                    </div>
+                </div>
+
+            {% elif mode == "account_only" %}
+
+                {% for choice in q.choices %}
+                    <label class="choice-label">
+                        <input type="checkbox"
+                            name="q{{ q_index }}"
+                            value="{{ choice }}">
+                        {{ choice }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="answers{{ q_index }}" value="{{ q.answers | join(',') }}">
+            {% elif mode == "direction_only" %}
+
+                {% for entry in q.entries %}
+                    <div style="margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:8px; background:white;">
+                        <div style="font-weight:bold; font-size:20px; margin-bottom:10px;">
+                            {{ entry.account }}
+                        </div>
+
+                        <label class="choice-label">
+                            <input type="radio"
+                                name="direction_side_{{ q_index }}_{{ loop.index0 }}"
+                                value="借方">
+                            借方
+                        </label>
+
+                        <label class="choice-label">
+                            <input type="radio"
+                                name="direction_side_{{ q_index }}_{{ loop.index0 }}"
+                                value="貸方">
+                            貸方
+                        </label>
+
+                        <input type="hidden" name="direction_account_{{ q_index }}_{{ loop.index0 }}" value="{{ entry.account }}">
+                        <input type="hidden" name="direction_side_answer_{{ q_index }}_{{ loop.index0 }}" value="{{ entry.side }}">
+                    </div>
+                {% endfor %}
+
+                <input type="hidden" name="direction_entry_count_{{ q_index }}" value="{{ q.entries|length }}">
+                <input type="hidden" name="direction_question_{{ q_index }}" value="{{ q.question }}">
+                <input type="hidden" name="direction_explanation_{{ q_index }}" value="{{ q.explanation }}">
+
+            {% elif mode == "stock_flow" %}
+
+                <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+
+                    {% for value, label in q.choices %}
+                        <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                        <label class="choice-label">
+                            <input type="radio"
+                                name="q{{ q_index }}"
+                                value="{{ value }}">
+                            {{ label }}
+                        </label>
+                    {% endfor %}
+
+
+                    <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                    <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                    <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+                </div>
+
+            {% elif mode == "inventory_gap" %}
+
+                <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                    <div style="font-weight:bold; font-size:20px; margin-bottom:12px;">
+                        {{ q.question }}
+                    </div>
+
+                    {% for value, label in q.choices %}
+
+                        <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                        <label class="choice-label">
+                            <input type="radio"
+                                name="q{{ q_index }}"
+                                value="{{ value }}">
+                            {{ label }}
+                        </label>
+                    {% endfor %}
+
+                    <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                    <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                    <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+                </div>
+
+
+        {% elif mode == "bs_pl_reason" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+
+
+        {% elif mode == "bs_pl_reverse" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+
+        {% elif mode == "worksheet_intro" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                <div style="font-weight:bold; font-size:20px; margin-bottom:12px;">
+                    {{ q.question }}
+                </div>
+
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+
+        {% elif mode == "worksheet_sort" %}
+
+            <div style="background:white; padding:12px; margin-bottom:10px; border-radius:10px;">
+                <div style="font-weight:bold; font-size:18px; margin-bottom:10px;">
+                    {{ q.account }}
+                </div>
+
+                <label class="choice-label">
+                    <input type="radio" name="q{{ q_index }}" value="bs">
+                    BS（貸借対照表）
+                </label>
+
+                <label class="choice-label">
+                    <input type="radio" name="q{{ q_index }}" value="pl">
+                    PL（損益計算書）
+                </label>
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.account }}">
+            </div>
+                    {% elif mode == "trial_balance_direction" %}
+
+                <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                    <div style="font-weight:bold; font-size:22px; margin-bottom:12px;">
+                        {{ q.account }}
+                    </div>
+
+                    <p style="font-size:14px; color:#555; margin-bottom:12px;">
+                        残高試算表で、この勘定の残高はどちらに出ますか？
+                    </p>
+
+                    <label class="choice-label">
+                        <input type="radio" name="tb_side_{{ q_index }}" value="借方"> 借方
+                    </label>
+
+                    <label class="choice-label">
+                        <input type="radio" name="tb_side_{{ q_index }}" value="貸方"> 貸方
+                    </label>
+
+                    <input type="hidden" name="tb_account_{{ q_index }}" value="{{ q.account }}">
+                    <input type="hidden" name="tb_answer_{{ q_index }}" value="{{ q.answer }}">
+                    <input type="hidden" name="tb_explanation_{{ q_index }}" value="{{ q.explanation }}">
+                </div>
+
+
+            {% elif mode == "worksheet_amount" %}
+
+                <div style="background:white; padding:12px; margin-bottom:10px; border-radius:10px;">
+                    <div style="font-weight:bold; font-size:18px; margin-bottom:10px;white-space: pre-line;">
+                        {{ q.question }}
+                    </div>
+
+                    <p style="font-size:14px; color:#555; margin-bottom:12px;">
+                        この勘定は
+                        {% if q.side == "bs" %}
+                            BS（貸借対照表）
+                        {% else %}
+                            PL（損益計算書）
+                        {% endif %}
+                        にあります。金額を入力してください。
+                    </p>
+
+                    <div style="font-weight:bold; margin-bottom:8px;">
+                        {% if q.side == "bs" %}
+                            BS（貸借対照表）
+                        {% else %}
+                            PL（損益計算書）
+                        {% endif %}
+                    </div>
+
+                    <input type="text"
+                        name="q{{ q_index }}"
+                        placeholder="例：300000"
+                        inputmode="numeric"
+                        autocomplete="off">
+
+                    <input type="hidden" name="a{{ q_index }}" value="{{ q.amount }}">
+                    <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                    <input type="hidden" name="text{{ q_index }}" value="{{ q.account }}">
+                    <input type="hidden" name="side{{ q_index }}" value="{{ q.side }}">
+                </div>
+
+        {% elif mode == "inventory_journal_link" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                <div style="font-weight:bold; font-size:20px; margin-bottom:12px;">
+                    {{ q.question }}
+                </div>
+
+                {% for value, label in q.choices %}
+
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>        
+
+            {% elif mode == "trial_balance_amount" %}
+
+                <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                    <div style="font-weight:bold; font-size:22px; margin-bottom:12px;">
+                        {{ q.account }}
+                    </div>
+
+                    <p style="font-size:14px; color:#555; margin-bottom:12px;">
+                        この勘定の残高は{{ q.side }}にあります。金額を入力してください。
+                    </p>
+
+                    <div style="font-weight:bold; margin-bottom:8px;">
+                        {{ q.side }}
+                    </div>
+
+                    <input type="text"
+                        name="tb_amount_user_{{ q_index }}"
+                        placeholder="例：100000"
+                        inputmode="numeric"
+                        autocomplete="off">
+                        
+                    <input type="hidden" name="tb_amount_account_{{ q_index }}" value="{{ q.account }}">
+                    <input type="hidden" name="tb_amount_side_{{ q_index }}" value="{{ q.side }}">
+                    <input type="hidden" name="tb_amount_answer_{{ q_index }}" value="{{ q.amount }}">
+                    <input type="hidden" name="tb_amount_explanation_{{ q_index }}" value="{{ q.explanation }}">
+                </div>
+
+        {% elif mode == "bs_pl" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+
+        {% elif mode == "closing_transfer" %}
+
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                <div style="font-weight:bold; font-size:20px; margin-bottom:12px;">
+                    {{ q.question }}
+                </div>
+
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio"
+                            name="q{{ q_index }}"
+                            value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+
+        {% else %}
+            <div style="margin-top:10px; background:white; padding:12px; border-radius:10px;">
+                {% for value, label in q.choices %}
+                    <input type="hidden" name="label_{{ q_index }}_{{ value }}" value="{{ label }}">
+
+                    <label class="choice-label">
+                        <input type="radio" name="q{{ q_index }}" value="{{ value }}">
+                        {{ label }}
+                    </label>
+                {% endfor %}
+
+                <input type="hidden" name="a{{ q_index }}" value="{{ q.answer }}">
+                <input type="hidden" name="e{{ q_index }}" value="{{ q.explanation }}">
+                <input type="hidden" name="text{{ q_index }}" value="{{ q.question }}">
+            </div>
+        {% endif %}
+
+        </div>
+    {% endfor %}
+    <div class="submit-area">
+        <input type="submit" value="採点" class="submit-btn">
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+        <a href="/" style="
+            display:inline-block;
+            padding:10px 20px;
+            background:#1976d2;
+            color:white;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:bold;
+        ">
+            ホームへ戻る
+        </a>
+    </div>
+</div>
+</form>
+
+{% endif %}
+
+<script>
+window.onload = function() {
+    const autoJump = {{ 'true' if auto_jump else 'false' }};
+    if (autoJump === true) {
+        const target = document.getElementById("question-start");
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+}
+</script>
+</div>
+</body>
+</html>
