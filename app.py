@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session
 import quiz
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
 
@@ -176,8 +176,6 @@ def home():
             "score": score,
             "total": total,
             "mode": mode,
-            from datetime import datetime, timedelta
-
             "time": (datetime.utcnow() + timedelta(hours=9)).strftime("%H:%M")        })
 
         wrong_questions = session.get("wrong_questions", {})
