@@ -176,8 +176,9 @@ def home():
             "score": score,
             "total": total,
             "mode": mode,
-            "time": datetime.now().strftime("%H:%M")
-        })
+            from datetime import datetime, timedelta
+
+            "time": (datetime.utcnow() + timedelta(hours=9)).strftime("%H:%M")        })
 
         wrong_questions = session.get("wrong_questions", {})
 
