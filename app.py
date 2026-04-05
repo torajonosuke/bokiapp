@@ -60,11 +60,34 @@ def log_access():
                 key, value = line.split(",", 1)
                 counts[key] = int(value)
 
+    counts[mode] = counts.get(mode, 0) + 1
+
+    with open(filename, "w", encoding="utf-8") as f:
+        for key, value in counts.items():
+            f.write(f"{key},{value}\n")
+
+@app.route("/count")
+def show_count():
+    now = datetime.utcnow() + timedelta(hours=9)
+    today = now.strftime("%Y-%m-%d")
+
+    if os.path.exists("count.txt"):
+        with open("count.txt", "r", encoding="utf-8") as f:
+            saved_date = f.readline().strip()
+            saved_count = f.readline().strip()
+
+        if saved_date == today:
+            count = saved_count
+        else:
+            count = "0"
+    else:
+        count = "0"
+
+    return f"今日のアクセス回数：{count}"
+
+
 @app.route("/mode_count")
 def show_mode_count():
-    from datetime import datetime, timedelta
-    import os
-
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
@@ -77,19 +100,10 @@ def show_mode_count():
 
     with open(filename, "r", encoding="utf-8") as f:
         for line in f:
-            key, value = line.strip().split(",")
+            key, value = line.strip().split(",", 1)
             result += f"{key}：{value}回<br>"
 
     return result
-
-history_file = Path("score_history.json")
-
-if history_file.exists():
-    with open(history_file, "r", encoding="utf-8") as f:
-        score_history = json.load(f)
-else:
-    score_history = []
-
 
 @app.route("/", methods=["GET", "POST"])
 def home():
