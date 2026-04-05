@@ -12,32 +12,53 @@ from datetime import datetime
 import os
 
 @app.before_request
+@app.before_request
+@app.before_request
 def log_access():
-    # ログ
-    with open("access.log", "a") as f:
-        f.write(f"{datetime.now()}\n")
+    now = datetime.utcnow() + timedelta(hours=9)
+    today = now.strftime("%Y-%m-%d")
 
-    # カウント
+    # ログ
+    with open("access.log", "a", encoding="utf-8") as f:
+        f.write(f"{now.strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+    # 今日の回数だけ数える
     if os.path.exists("count.txt"):
-        with open("count.txt", "r") as f:
-            count = int(f.read())
+        with open("count.txt", "r", encoding="utf-8") as f:
+            saved_date = f.readline().strip()
+            saved_count = f.readline().strip()
+
+        if saved_date == today:
+            count = int(saved_count)
+        else:
+            count = 0
     else:
         count = 0
 
     count += 1
 
-    with open("count.txt", "w") as f:
+    with open("count.txt", "w", encoding="utf-8") as f:
+        f.write(f"{today}\n")
         f.write(str(count))
 
 @app.route("/count")
 def show_count():
+    now = datetime.utcnow() + timedelta(hours=9)
+    today = now.strftime("%Y-%m-%d")
+
     if os.path.exists("count.txt"):
-        with open("count.txt", "r") as f:
-            count = f.read()
+        with open("count.txt", "r", encoding="utf-8") as f:
+            saved_date = f.readline().strip()
+            saved_count = f.readline().strip()
+
+        if saved_date == today:
+            count = saved_count
+        else:
+            count = "0"
     else:
         count = "0"
 
-    return f"アクセス回数：{count}"
+    return f"今日のアクセス回数：{count}"
 
 history_file = Path("score_history.json")
 
