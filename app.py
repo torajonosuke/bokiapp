@@ -60,24 +60,27 @@ def log_access():
                 key, value = line.split(",", 1)
                 counts[key] = int(value)
 
-@app.route("/count")
-def show_count():
+@app.route("/mode_count")
+def show_mode_count():
+    from datetime import datetime, timedelta
+    import os
+
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
-    if os.path.exists("count.txt"):
-        with open("count.txt", "r", encoding="utf-8") as f:
-            saved_date = f.readline().strip()
-            saved_count = f.readline().strip()
+    filename = f"mode_count_{today}.txt"
 
-        if saved_date == today:
-            count = saved_count
-        else:
-            count = "0"
-    else:
-        count = "0"
+    if not os.path.exists(filename):
+        return "データなし"
 
-    return f"今日のアクセス回数：{count}"
+    result = ""
+
+    with open(filename, "r", encoding="utf-8") as f:
+        for line in f:
+            key, value = line.strip().split(",")
+            result += f"{key}：{value}回<br>"
+
+    return result
 
 history_file = Path("score_history.json")
 
