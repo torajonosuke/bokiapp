@@ -7,6 +7,11 @@ from pathlib import Path
 app = Flask(__name__)
 app.secret_key = "bookkeeping-app-secret"
 
+@app.before_request
+def log_access():
+    with open("access.log", "a") as f:
+        f.write(f"{datetime.now()}\n")
+
 history_file = Path("score_history.json")
 
 if history_file.exists():
