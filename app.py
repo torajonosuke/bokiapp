@@ -71,17 +71,15 @@ def show_count():
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
-    if os.path.exists("count.txt"):
-        with open("count.txt", "r", encoding="utf-8") as f:
-            saved_date = f.readline().strip()
-            saved_count = f.readline().strip()
-
-        if saved_date == today:
-            count = saved_count
-        else:
-            count = "0"
-    else:
-        count = "0"
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or "," not in line:
+                    continue
+                key, value = line.split(",", 1)
+                if value.isdigit():
+                    counts[key] = int(value)
 
     return f"今日のアクセス回数：{count}"
 
@@ -100,7 +98,10 @@ def show_mode_count():
 
     with open(filename, "r", encoding="utf-8") as f:
         for line in f:
-            key, value = line.strip().split(",", 1)
+            line = line.strip()
+            if not line or "," not in line:
+                continue
+            key, value = line.split(",", 1)
             result += f"{key}：{value}回<br>"
 
     return result
