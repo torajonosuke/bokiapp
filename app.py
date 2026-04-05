@@ -3,14 +3,41 @@ import quiz
 from datetime import datetime, timedelta
 import json
 from pathlib import Path
+import os
 
 app = Flask(__name__)
 app.secret_key = "bookkeeping-app-secret"
 
+from datetime import datetime
+import os
+
 @app.before_request
 def log_access():
+    # ログ
     with open("access.log", "a") as f:
         f.write(f"{datetime.now()}\n")
+
+    # カウント
+    if os.path.exists("count.txt"):
+        with open("count.txt", "r") as f:
+            count = int(f.read())
+    else:
+        count = 0
+
+    count += 1
+
+    with open("count.txt", "w") as f:
+        f.write(str(count))
+
+@app.route("/count")
+def show_count():
+    if os.path.exists("count.txt"):
+        with open("count.txt", "r") as f:
+            count = f.read()
+    else:
+        count = "0"
+
+    return f"アクセス回数：{count}"
 
 history_file = Path("score_history.json")
 
