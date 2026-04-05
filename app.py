@@ -91,27 +91,12 @@ def show_count():
     return f"今日のアクセス回数：{count}"
 
 
-@app.route("/mode_count")
-def show_mode_count():
-    now = datetime.utcnow() + timedelta(hours=9)
-    today = now.strftime("%Y-%m-%d")
+excluded_paths = ["/count", "/mode_count", "/favicon.ico"]
 
-    filename = f"mode_count_{today}.txt"
+if request.path in excluded_paths:
+    return
 
-    if not os.path.exists(filename):
-        return "データなし"
 
-    result = ""
-
-    with open(filename, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line or "," not in line:
-                continue
-            key, value = line.split(",", 1)
-            result += f"{key}：{value}回<br>"
-
-    return result
 
 @app.route("/", methods=["GET", "POST"])
 def home():
