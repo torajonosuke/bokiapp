@@ -20,6 +20,9 @@ import os
 
 @app.before_request
 def log_access():
+    excluded_paths = ["/count", "/mode_count", "/favicon.ico"]
+    if request.path in excluded_paths:
+        return
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
