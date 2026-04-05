@@ -6,6 +6,15 @@ from pathlib import Path
 app = Flask(__name__)
 app.secret_key = "bookkeeping-app-secret"
 
+
+history_file = Path("score_history.json")
+
+if history_file.exists():
+    with open(history_file, "r", encoding="utf-8") as f:
+        score_history = json.load(f)
+else:
+    score_history = []
+
 from datetime import datetime,timedelta
 import os
 
