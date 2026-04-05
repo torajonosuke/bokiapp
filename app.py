@@ -23,6 +23,7 @@ def log_access():
     excluded_paths = ["/count", "/mode_count", "/favicon.ico"]
     if request.path in excluded_paths:
         return
+
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
@@ -59,7 +60,6 @@ def log_access():
             mode = "other"
 
     filename = f"mode_count_{today}.txt"
-
     counts = {}
 
     if os.path.exists(filename):
@@ -72,11 +72,11 @@ def log_access():
                 if value.isdigit():
                     counts[key] = int(value)
 
-        counts[mode] = counts.get(mode, 0) + 1
+    counts[mode] = counts.get(mode, 0) + 1
 
-        with open(filename, "w", encoding="utf-8") as f:
-            for key, value in counts.items():
-                f.write(f"{key},{value}\n")
+    with open(filename, "w", encoding="utf-8") as f:
+        for key, value in counts.items():
+            f.write(f"{key},{value}\n")
 
 @app.route("/count")
 def show_count():
