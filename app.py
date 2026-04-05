@@ -1,14 +1,12 @@
 from flask import Flask, render_template, request, session
 import quiz
-from datetime import datetime, timedelta
 import json
 from pathlib import Path
-import os
 
 app = Flask(__name__)
 app.secret_key = "bookkeeping-app-secret"
 
-from datetime import datetime
+from datetime import datetime,timedelta
 import os
 
 @app.before_request
@@ -16,15 +14,11 @@ def log_access():
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
-    # ----------------------------
     # 1. アクセスログ保存
-    # ----------------------------
     with open("access.log", "a", encoding="utf-8") as f:
         f.write(f"{now.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
-    # ----------------------------
     # 2. 今日の総アクセス数カウント
-    # ----------------------------
     if os.path.exists("count.txt"):
         with open("count.txt", "r", encoding="utf-8") as f:
             saved_date = f.readline().strip()
@@ -43,9 +37,7 @@ def log_access():
         f.write(f"{today}\n")
         f.write(str(total_count))
 
-    # ----------------------------
     # 3. モード別カウント
-    # ----------------------------
     mode = request.args.get("mode", "other")
     filename = f"mode_count_{today}.txt"
 
@@ -55,10 +47,11 @@ def log_access():
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
-                if not line:
+                if not line or "," not in line:
                     continue
                 key, value = line.split(",", 1)
-                counts[key] = int(value)
+                if value.isdigit():
+                    counts[key] = int(value)
 
     counts[mode] = counts.get(mode, 0) + 1
 
@@ -71,15 +64,17 @@ def show_count():
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line or "," not in line:
-                    continue
-                key, value = line.split(",", 1)
-                if value.isdigit():
-                    counts[key] = int(value)
+    if os.path.exists("count.txt"):
+        with open("count.txt", "r", encoding="utf-8") as f:
+            saved_date = f.readline().strip()
+            saved_count = f.readline().strip()
+
+        if saved_date == today:
+            count = saved_count
+        else:
+            count = "0"
+    else:
+        count = "0"
 
     return f"今日のアクセス回数：{count}"
 
