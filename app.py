@@ -96,7 +96,38 @@ def show_count():
     if request.path in excluded_paths:
         return
 
+@app.route("/mode_count")
+def show_mode_count():
+    now = datetime.utcnow() + timedelta(hours=9)
+    today = now.strftime("%Y-%m-%d")
 
+    filename = f"mode_count_{today}.txt"
+
+    if not os.path.exists(filename):
+        return "データなし"
+
+    counts = []
+
+    with open(filename, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or "," not in line:
+                continue
+            key, value = line.split(",", 1)
+            if value.isdigit():
+                counts.append((key, int(value)))
+
+    if not counts:
+        return "データなし"
+
+    counts.sort(key=lambda x: x[1], reverse=True)
+
+    result = "<h2>今日のモード別アクセスランキング</h2>"
+
+    for i, (key, value) in enumerate(counts, start=1):
+        result += f"{i}位：{key}（{value}回）<br>"
+
+    return result
 
 @app.route("/", methods=["GET", "POST"])
 def home():
