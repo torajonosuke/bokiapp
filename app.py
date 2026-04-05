@@ -50,13 +50,14 @@ def log_access():
         f.write(str(total_count))
 
     # 3. モード別カウント
-mode = request.args.get("mode")
+    mode = request.args.get("mode")
 
-if not mode:
-    if request.path == "/":
-        mode = "home"
-    else:
-        mode = "other"
+    if not mode:
+        if request.path == "/":
+            mode = "home"
+        else:
+            mode = "other"
+
     filename = f"mode_count_{today}.txt"
 
     counts = {}
@@ -71,11 +72,11 @@ if not mode:
                 if value.isdigit():
                     counts[key] = int(value)
 
-    counts[mode] = counts.get(mode, 0) + 1
+        counts[mode] = counts.get(mode, 0) + 1
 
-    with open(filename, "w", encoding="utf-8") as f:
-        for key, value in counts.items():
-            f.write(f"{key},{value}\n")
+        with open(filename, "w", encoding="utf-8") as f:
+            for key, value in counts.items():
+                f.write(f"{key},{value}\n")
 
 @app.route("/count")
 def show_count():
