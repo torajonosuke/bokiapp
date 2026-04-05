@@ -16,10 +16,37 @@ def log_access():
     now = datetime.utcnow() + timedelta(hours=9)
     today = now.strftime("%Y-%m-%d")
 
-    # mode取得（なければ "other"）
-    mode = request.args.get("mode", "other")
+    # ----------------------------
+    # 1. アクセスログ保存
+    # ----------------------------
+    with open("access.log", "a", encoding="utf-8") as f:
+        f.write(f"{now.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
-    # ===== モード別カウント =====
+    # ----------------------------
+    # 2. 今日の総アクセス数カウント
+    # ----------------------------
+    if os.path.exists("count.txt"):
+        with open("count.txt", "r", encoding="utf-8") as f:
+            saved_date = f.readline().strip()
+            saved_count = f.readline().strip()
+
+        if saved_date == today and saved_count.isdigit():
+            total_count = int(saved_count)
+        else:
+            total_count = 0
+    else:
+        total_count = 0
+
+    total_count += 1
+
+    with open("count.txt", "w", encoding="utf-8") as f:
+        f.write(f"{today}\n")
+        f.write(str(total_count))
+
+    # ----------------------------
+    # 3. モード別カウント
+    # ----------------------------
+    mode = request.args.get("mode", "other")
     filename = f"mode_count_{today}.txt"
 
     counts = {}
@@ -27,38 +54,11 @@ def log_access():
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
-                key, value = line.strip().split(",")
+                line = line.strip()
+                if not line:
+                    continue
+                key, value = line.split(",", 1)
                 counts[key] = int(value)
-
-    # カウントアップ
-    counts[mode] = counts.get(mode, 0) + 1
-
-    # 保存
-    with open(filename, "w", encoding="utf-8") as f:
-        for key, value in counts.items():
-            f.write(f"{key},{value}\n")
-
-@app.route("/mode_count")
-def show_mode_count():
-    from datetime import datetime, timedelta
-    import os
-
-    now = datetime.utcnow() + timedelta(hours=9)
-    today = now.strftime("%Y-%m-%d")
-
-    filename = f"mode_count_{today}.txt"
-
-    if not os.path.exists(filename):
-        return "データなし"
-
-    result = ""
-
-    with open(filename, "r", encoding="utf-8") as f:
-        for line in f:
-            key, value = line.strip().split(",")
-            result += f"{key}：{value}回<br>"
-
-    return result
 
 @app.route("/count")
 def show_count():
