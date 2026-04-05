@@ -91,10 +91,10 @@ def show_count():
     return f"今日のアクセス回数：{count}"
 
 
-excluded_paths = ["/count", "/mode_count", "/favicon.ico"]
+    excluded_paths = ["/count", "/mode_count", "/favicon.ico"]
 
-if request.path in excluded_paths:
-    return
+    if request.path in excluded_paths:
+        return
 
 
 
