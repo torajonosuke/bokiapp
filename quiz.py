@@ -14,7 +14,7 @@ file_path = base_dir / "material_boki3.xlsx"
 # =========================
 df_class = pd.read_excel(file_path, sheet_name="分類問題")
 
-current_stage = 2  # ← クラスごとに変える
+current_stage = 1  # ← クラスごとに変える
 
 df_class = df_class[df_class["stage"] <= current_stage]
 
@@ -70,7 +70,7 @@ for _, row in df_class.iterrows():
 # =========================
 df = pd.read_excel(file_path, sheet_name="理由問題")
 
-current_stage = 3  # ← ここだけ変える
+current_stage = 1  # ← ここだけ変える
 
 df = df[df["stage"] <= current_stage]
 
